@@ -1,4 +1,4 @@
-package nz.co.brettyukich.matao.serial.data;
+package nz.co.brettyukich.hermes.serial.data;
 
 /**
  * Created by cascade on 14/05/15.

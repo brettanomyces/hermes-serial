@@ -1,6 +1,6 @@
-package nz.co.brettyukich.matao.serial.data;
+package nz.co.brettyukich.hermes.serial.data;
 
-import nz.co.brettyukich.matao.serial.model.BaffelReading;
+import nz.co.brettyukich.hermes.serial.model.BaffelReading;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

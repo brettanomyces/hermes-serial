@@ -1,7 +1,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>nz.co.brettyukich</groupId>
-    <artifactId>matao-serial</artifactId>
+    <artifactId>hermes-serial</artifactId>
     <version>1</version>
 
     <dependencies>
@@ -44,7 +44,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>nz.co.brettyukich.matao.serial.Application</mainClass>
+                            <mainClass>nz.co.brettyukich.hermes.serial.Application</mainClass>
                             <id>app</id>
                         </program>
                     </programs>

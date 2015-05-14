@@ -1,4 +1,4 @@
-package nz.co.brettyukich.matao.serial.model;
+package nz.co.brettyukich.hermes.serial.model;
 
 import java.sql.Timestamp;
 
