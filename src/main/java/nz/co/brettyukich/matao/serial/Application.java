@@ -9,6 +9,8 @@ public class Application {
   private static final Logger log = LoggerFactory.getLogger(Application.class);
 
   public static void main(String[] args){
+    log.info("starting matao-serial");
+    log.info("looking for ports");
     String[] portNames = SerialPortList.getPortNames();
     for (String name : portNames){
       log.info("found port: " + name);
