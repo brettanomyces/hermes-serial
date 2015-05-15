@@ -14,12 +14,16 @@ public class Properties {
   static {
     properties = new java.util.Properties();
     try {
+      // todo load properties from user provided file
       properties.load(new FileInputStream("application.properties"));
     } catch (IOException e) {
       String msg = "failed to load properties";
       log.error(msg, e);
     }
   }
+
+  // private constructor
+  private Properties(){}
 
   public static String getValue(String key){
     String value = properties.getProperty(key);

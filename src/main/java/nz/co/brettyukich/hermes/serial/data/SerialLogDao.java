@@ -21,18 +21,25 @@ public class SerialLogDao {
     this.dataSource = dataSource;
   }
 
-  public void insertBaffelReading(String baffel, BaffelReading reading) throws DaoException {
-    String sql = "insert into some_table (c1, c2) " +
-        "select bfl_id, ?" +
+  public void insertBaffelReading(String baffel, BaffelReading reading) throws DataAccessException {
+    String sql = "" +
+        "insert into some_table (bfr_bfl_id, bfr_timestamp, bfr_reading) " +
+        "select bfl_id, ?, ?" +
+        "from bfl_baffels " +
+        "where bfl_name = ?" +
         ";";
 
     try (PreparedStatement stmt = dataSource.getConnection().prepareStatement(sql)){
+      stmt.setTimestamp(0, reading.getTimestamp());
+      stmt.setString(1, reading.getBaffelState().name());
+      stmt.setString(2, baffel);
+      stmt.execute();
 
     } catch (SQLException e) {
-      throw new DaoException("failed to insert data", e);
+      log.error("failed to insert baffel reading", e);
+      // swallow
     }
   }
-
-
-
+  
+  public void insertSensorReading()
 }
