@@ -40,6 +40,4 @@ public class SerialLogDao {
       // swallow
     }
   }
-  
-  public void insertSensorReading()
 }
