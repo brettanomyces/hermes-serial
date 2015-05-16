@@ -7,13 +7,14 @@ import jssc.SerialPortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+
 /**
  * Created by cascade on 15/05/15.
  */
 public class SerialListener implements SerialPortEventListener{
 
   private static final Logger log = LoggerFactory.getLogger(SerialListener.class);
-  private StringBuilder sb = new StringBuilder();
   private SerialPort serialPort;
 
   public SerialListener(SerialPort serialPort){
@@ -22,24 +23,23 @@ public class SerialListener implements SerialPortEventListener{
 
   @Override
   public void serialEvent(SerialPortEvent event) {
+    byte[] buffer = new byte[1000];
+    InputStream is = new ByteArrayInputStream(buffer);
+    InputStreamReader isr = new InputStreamReader(is);
+    BufferedReader reader = new BufferedReader(isr);
+
     if(event.isRXCHAR() && event.getEventValue() > 0){
       log.debug("data is available");
       try {
-        byte buffer[] = serialPort.readBytes();
-        for (byte b : buffer){
-          if(b == '\r'){
-            log.debug("found newline character");
-            // newline represents end of stream
-            String message = sb.toString();
-            // todo process message
-            log.info("received message: " + message);
-          } else {
-            sb.append((char)b);
-          }
+        is.read(serialPort.readBytes());
+        String line = reader.readLine();
+        if(line != null){
+          log.info("recieved: " + line);
         }
+      } catch (IOException e) {
+        e.printStackTrace();
       } catch (SerialPortException e) {
-        // todo handle exception
-        log.error("an error occured while reading data from serial port", e);
+        e.printStackTrace();
       }
     }
   }
