@@ -2,12 +2,16 @@ package nz.co.brettyukich.hermes.serial;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import nz.co.brettyukich.hermes.serial.serial.SerialInputStream;
 import nz.co.brettyukich.hermes.serial.serial.SerialListener;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class Application {
 
@@ -15,15 +19,16 @@ public class Application {
   private static DataSource dataSource;
   private static SerialPort serialPort;
 
-  public static void main(String[] args) {
+
+  public static void main(String[] args) throws IOException {
     log.info("starting hermes-serial");
     setupDatasource();
     setupSerialPort();
-    try {
-      serialPort.addEventListener(new SerialListener(serialPort));
-    } catch (SerialPortException e) {
-      e.printStackTrace();
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new SerialInputStream(serialPort)));
+    while (true){
+      log.info(reader.readLine());
     }
+
   }
   
   private static void setupDatasource(){
@@ -44,7 +49,7 @@ public class Application {
   
   private static void setupSerialPort(){
     log.info("connecting to serial port");
-    long wait = Long.valueOf(Properties.getValue("serial.wait"));
+    long wait = Long.valueOf(Properties.getValue("serial.wait.millis"));
     boolean connected = false;
     while (!connected){
       try {
