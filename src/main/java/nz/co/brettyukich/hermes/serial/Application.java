@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Application {
@@ -55,23 +56,17 @@ public class Application {
 //        log.info(new String(newData));
 //      }
 //    });
-    if (serialPort.openPort()){
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-      String line;
-      while (true) {
-        try {
-          if (serialPort.bytesAvailable() > 0) {
-            while ((line = bufferedReader.readLine()) != null) {
-              log.info("line: " + line);
-            }
-            log.info("eof / socket closed");
-          }
-        } catch (IOException e) {
-          log.error("failed to read data from serial port");
-        }
+    if (serialPort.openPort()) {
+      serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+      InputStream in = serialPort.getInputStream();
+      try {
+        for (int j = 0; j < 1000; ++j)
+          System.out.print((char) in.read());
+        in.close();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-    } else {
-      log.error("Failed to open serial port " + Properties.getValue("serial.name"));
+      serialPort.closePort();
     }
   }
   
