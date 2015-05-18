@@ -1,9 +1,6 @@
 package nz.co.brettyukich.hermes.serial;
 
-import jssc.SerialPort;
-import jssc.SerialPortException;
-import nz.co.brettyukich.hermes.serial.serial.SerialInputStream;
-import nz.co.brettyukich.hermes.serial.serial.SerialListener;
+import com.fazecast.jSerialComm.SerialPort;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +14,43 @@ public class Application {
 
   private static final Logger log = LoggerFactory.getLogger(Application.class);
   private static DataSource dataSource;
-  private static SerialPort serialPort;
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException{
     log.info("starting hermes-serial");
-    setupDatasource();
-    setupSerialPort();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new SerialInputStream(serialPort)));
-    while (true){
-      log.info(reader.readLine());
+    // TODO once I've got serial working reliably
+    // setupDatasource();
+    for (SerialPort port : SerialPort.getCommPorts()){
+      log.info(port.getDescriptivePortName());
+      log.info(port.getSystemPortName());
+      log.info(String.valueOf(port.getBaudRate()));
     }
+    setupSerial();
+  }
+  
+  private static void setupSerial() {
+    SerialPort serialPort = SerialPort.getCommPort(Properties.getValue("serial.name"));
+    serialPort.setComPortParameters(
+        Integer.parseInt(Properties.getValue("serial.baud")),
+        Integer.parseInt(Properties.getValue("serial.databits")),
+        Integer.parseInt(Properties.getValue("serial.stopbits")),
+        Integer.parseInt(Properties.getValue("serial.parity"))
+    );
+    if (serialPort.openPort()){
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+      String line;
+      try {
+        while ((line = bufferedReader.readLine()) != null){
+          log.info("line: " + line);
+        }
+        log.info("eof / socket closed");
+      } catch (IOException e) {
+        log.error("error reading form serial port", e);
+      }
+    } else {
+      log.error("Failed to open serial port " + Properties.getValue("serial.name"));
+    }
+    
 
   }
   
@@ -46,38 +69,4 @@ public class Application {
     ds.setPassword(Properties.getValue("database.password"));
     dataSource = ds;
   }
-  
-  private static void setupSerialPort(){
-    log.info("connecting to serial port");
-    long wait = Long.valueOf(Properties.getValue("serial.wait.millis"));
-    boolean connected = false;
-    while (!connected){
-      try {
-        SerialPort sp = new SerialPort(Properties.getValue("serial.name"));
-        sp.openPort();
-        sp.setParams(
-            Integer.valueOf(Properties.getValue("serial.baud")),
-            Integer.valueOf(Properties.getValue("serial.databits")),
-            Integer.valueOf(Properties.getValue("serial.stopbits")),
-            Integer.valueOf(Properties.getValue("serial.parity"))
-        );
-        int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;
-        sp.setEventsMask(mask);
-        connected = true;
-      } catch (SerialPortException spe) {
-        log.error("failed to open serial port", spe);
-        try {
-          log.info("waiting " + wait + " seconds");
-          Thread.sleep(wait);
-        } catch (InterruptedException ie) {
-          log.error("an exception occurred while waiting to connect to serial port", ie);
-        }
-      }
-    }
-  }
-  
-  private static void setupSerialEventListeners(SerialPort serialPort){
-    
-  }
-  
 }
