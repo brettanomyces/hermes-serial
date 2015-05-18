@@ -1,6 +1,8 @@
 package nz.co.brettyukich.hermes.serial;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,20 +38,37 @@ public class Application {
         Integer.parseInt(Properties.getValue("serial.stopbits")),
         Integer.parseInt(Properties.getValue("serial.parity"))
     );
-    if (serialPort.openPort()){
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
-      String line;
-      try {
-        while ((line = bufferedReader.readLine()) != null){
-          log.info("line: " + line);
-        }
-        log.info("eof / socket closed");
-      } catch (IOException e) {
-        log.error("error reading form serial port", e);
+    serialPort.openPort();
+    serialPort.addDataListener(new SerialPortDataListener() {
+      @Override
+      public int getListeningEvents() {
+        return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
       }
-    } else {
-      log.error("Failed to open serial port " + Properties.getValue("serial.name"));
-    }
+
+      @Override
+      public void serialEvent(SerialPortEvent event) {
+        if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
+          return;
+        byte[] newData = new byte[serialPort.bytesAvailable()];
+        int numRead = serialPort.readBytes(newData, newData.length);
+        log.info("Read " + numRead + " bytes.");
+        log.info(new String(newData));
+      }
+    });
+//    if (serialPort.openPort()){
+//      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
+//      String line;
+//      try {
+//        while ((line = bufferedReader.readLine()) != null){
+//          log.info("line: " + line);
+//        }
+//        log.info("eof / socket closed");
+//      } catch (IOException e) {
+//        log.error("error reading form serial port", e);
+//      }
+//    } else {
+//      log.error("Failed to open serial port " + Properties.getValue("serial.name"));
+//    }
     
 
   }
