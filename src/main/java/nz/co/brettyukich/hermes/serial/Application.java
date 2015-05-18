@@ -31,7 +31,7 @@ public class Application {
     setupSerial();
   }
   
-  private static void setupSerial() {
+  private static void setupSerial() throws IOException {
     SerialPort serialPort = SerialPort.getCommPort(Properties.getValue("serial.name"));
     serialPort.setComPortParameters(
         Integer.parseInt(Properties.getValue("serial.baud")),
@@ -61,14 +61,16 @@ public class Application {
       InputStream in = serialPort.getInputStream();
       InputStreamReader isr = new InputStreamReader(in);
       BufferedReader reader = new BufferedReader(isr);
-      try {
-        for (int j = 0; j < 1000; ++j){
-          log.info(reader.readLine());
+      String line;
+      while (true) {
+        log.info("reading from buffered reader");
+        if (reader.ready() && (line = reader.readLine()) != null) {
+          log.info(line);
         }
-        in.close();
-      } catch (Exception e) {
-        e.printStackTrace();
       }
+      log.info("closing input stream");
+      in.close();
+      log.info("closing port");
       serialPort.closePort();
     }
   }
