@@ -59,9 +59,12 @@ public class Application {
     if (serialPort.openPort()) {
       serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
       InputStream in = serialPort.getInputStream();
+      InputStreamReader isr = new InputStreamReader(in);
+      BufferedReader reader = new BufferedReader(isr);
       try {
-        for (int j = 0; j < 1000; ++j)
-          System.out.print((char) in.read());
+        for (int j = 0; j < 1000; ++j){
+          log.info(reader.readLine());
+        }
         in.close();
       } catch (Exception e) {
         e.printStackTrace();
